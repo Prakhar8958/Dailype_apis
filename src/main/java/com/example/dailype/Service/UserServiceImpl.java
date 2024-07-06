@@ -24,30 +24,45 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private ManagerRepo managerrepo;
 
+    List<UUID> managerids=new ArrayList<UUID>();
     @Override
-    public ResponseEntity<String> createUser(String fullName, String mobNum, String panNum, UUID managerId) {
-        if (fullName.isEmpty()) {
+    public ResponseEntity<String> createUser(User user) {
+        if (user.getFullName().isEmpty()) {
             throw new IllegalArgumentException("Full name must not be empty.");
         }
 
-        mobNum = validateMobileNumber(mobNum);
-        panNum = panNum.toUpperCase();
+        String mobNum = validateMobileNumber(user.getMobNum());
+        String panNum = user.getPanNum().toUpperCase();
 
-        if (managerId != null && !managerrepo.existsByIdAndIsActive(managerId, true)) {
+        if (user.getManager().getId() != null && !managerrepo.existsByIdAndIsActive(user.getManager().getId(), true)) {
             throw new IllegalArgumentException("Manager ID is not valid or inactive.");
         }
 
-        User user = new User();
-        user.setFullName(fullName);
-        user.setMobNum(mobNum);
-        user.setPanNum(panNum);
-        if (managerId != null) {
-            Manager manager = managerrepo.findById(managerId).orElseThrow(() -> new IllegalArgumentException("Manager not found"));
-            user.setManager(manager);
+
+        User newuser = new User();
+        newuser.setFullName(user.getFullName());
+        newuser.setMobNum(mobNum);
+        newuser.setPanNum(panNum);
+        if (user.getManager().getId() != null) {
+            Manager manager = managerrepo.findById(user.getManager().getId()).orElseThrow(() -> new IllegalArgumentException("Manager not found"));
+            newuser.setManager(manager);
+            managerids.add(manager.getId());
         }
-        user.setCreatedAt(Timestamp.from(Instant.now()));
-        user.setUpdatedAt(Timestamp.from(Instant.now()));
-        userrepo.save(user);
+        /*if(user.getUser()!=null){
+            User manger=userrepo.findById(user.getUser().getId()).orElseThrow(() -> new IllegalArgumentException("Not found"));
+            newuser.setUser(manger);
+        }*/
+        if(user.getSubordinates()!=null){
+            for(User subuser:user.getSubordinates()){
+                User manger=userrepo.findById(subuser.getId()).orElseThrow(() -> new IllegalArgumentException("Not found"));
+                newuser.getSubordinates().add(manger);
+                newuser.setSubordinates(user.getSubordinates());
+            }
+        }
+
+        newuser.setCreatedAt(Timestamp.from(Instant.now()));
+        newuser.setUpdatedAt(Timestamp.from(Instant.now()));
+        userrepo.save(newuser);
 
         try {
             return new ResponseEntity<>("Success", HttpStatus.CREATED);
@@ -122,6 +137,42 @@ public class UserServiceImpl implements UserService{
         return new ResponseEntity<>("Try Again",HttpStatus.BAD_REQUEST);
 
     }
+
+
+    /*
+    @Override
+    public ResponseEntity<String> createNewUser(String fullName, String mobNum, String panNum, String mangerId) {
+        Manager manager=managerrepo.getReferenceById(mangerId);
+        User newuser=new User();
+        if(managerids.contains(manager.getId())){
+            newuser.setMangerid(manager);
+        }
+        if (fullName.isEmpty()) {
+            throw new IllegalArgumentException("Full name must not be empty.");
+        }
+
+        mobNum = validateMobileNumber(mobNum);
+        panNum = panNum.toUpperCase();
+        newuser.setCreatedAt(Timestamp.from(Instant.now()));
+        newuser.setUpdatedAt(Timestamp.from(Instant.now()));
+        userrepo.save(newuser);
+        if(mangerId!=null){
+            managerids.add(manager.getId());
+        }
+        try {
+            return new ResponseEntity<>("Success", HttpStatus.CREATED);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>("Try Again",HttpStatus.BAD_REQUEST);
+
+
+
+
+    }
+*/
+
 
     private String validateMobileNumber(String mobNum) {
         if (mobNum.startsWith("+91")) {

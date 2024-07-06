@@ -1,5 +1,7 @@
 package com.example.dailype.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -35,6 +39,7 @@ public class User {
     @JoinColumn(name = "manager_id")
     private Manager manager;
 
+
     @Column(nullable = false)
     private boolean isActive = true;
 
@@ -44,6 +49,6 @@ public class User {
     @Column(nullable = false)
     private java.sql.Timestamp updatedAt;
 
-
-
+    @OneToMany(mappedBy = "id")
+    private Set<User> subordinates = new HashSet<>();
 }

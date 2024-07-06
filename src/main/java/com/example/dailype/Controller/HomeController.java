@@ -19,7 +19,7 @@ public class HomeController {
 
     @PostMapping("/create_user")
     public ResponseEntity<String> createUser(@RequestBody User user) {
-        return userService.createUser(user.getFullName(), user.getMobNum(), user.getPanNum(), user.getManager() != null ? user.getManager().getId() : null);
+        return userService.createUser(user);
     }
 
     @PostMapping("/get_users")
@@ -40,4 +40,9 @@ public class HomeController {
                              @RequestBody User updateData) {
         return userService.updateUser(userIds, updateData);
     }
+/*
+    @PostMapping("/createnew_user")
+    public ResponseEntity<String> createNewUser(@RequestBody String fullName,@RequestBody String mobNum,@RequestBody String panNum,@RequestBody String mangerId) {
+        return userService.createNewUser(fullName, mobNum, panNum, mangerId);
+    }*/
 }

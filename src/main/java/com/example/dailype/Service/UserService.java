@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface UserService {
 
-    ResponseEntity<String> createUser(String fullName, String mobNum, String panNum, UUID managerId);
+    ResponseEntity<String> createUser(User user);
 
     ResponseEntity<List<User>> getUsers(UUID userId, String mobNum, UUID managerId);
 
@@ -16,5 +16,5 @@ public interface UserService {
 
     ResponseEntity<String> updateUser(List<UUID> userIds, User updateData);
 
-
+//    ResponseEntity<String> createNewUser(String fullName, String mobNum, String panNum,String mangerId);
 }
